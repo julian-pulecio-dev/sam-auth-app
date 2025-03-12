@@ -5,5 +5,57 @@ Description: >
 
   Api Template for sam-auth-app
 
+Parameters:
+  SignUpLambdaIntegrationUri:
+    Type: String
+  SignUpLambdaIntegrationArn:
+    Type: String
+
 Resources:
+  AuthAppRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: AuthRestApi
   
+  AuthAppSignUpResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref AuthAppRestApi
+      ParentId:  !GetAtt AuthAppRestApi.RootResourceId
+      PathPart: sign_up
+  
+  AuthAppSignUpPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref AuthAppRestApi
+      ResourceId: !Ref AuthAppSignUpResource
+      HttpMethod: ANY
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Ref SignUpLambdaIntegrationUri
+  
+  AuthAppDeployment:
+    DependsOn: 
+      - AuthAppSignUpPostMethod
+    Type: 'AWS::ApiGateway::Deployment'
+    Properties:
+      RestApiId: !Ref AuthAppRestApi
+      Description: test deployment
+
+  AuthAppStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: TestStage
+      Description: API Stage for testing
+      DeploymentId: !Ref AuthAppDeployment
+      RestApiId: !Ref AuthAppRestApi
+
+  AuthAppSignUpLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref SignUpLambdaIntegrationArn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${AuthAppRestApi}/*/POST/sign_up

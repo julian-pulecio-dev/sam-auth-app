@@ -6,16 +6,9 @@ Description: >
   Cognito Template for sam-auth-app
 
 Parameters:
-  Email:
-    Type: String
-    Default: "User email (Required)"
-  UserName:
-    Type: String
-    Default: "User Name (Required)"
   ExampleCallbackURL:
     Type: String
     Default: "https://example.com/callback"
-
 
 Resources:
   AuthAppUserPool:
