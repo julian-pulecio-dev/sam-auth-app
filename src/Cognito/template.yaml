@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-auth-app
+
+  Cognito Template for sam-auth-app
+
+Parameters:
+  Email:
+    Type: String
+    Default: "User email (Required)"
+  UserName:
+    Type: String
+    Default: "User Name (Required)"
+  ExampleCallbackURL:
+    Type: String
+    Default: "https://example.com/callback"
+
+
+Resources:
+  AuthAppUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: AuthAppUserPool
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          PasswordHistorySize: 22
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+      
+  AuthAppUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    DependsOn: AuthAppUserPoolIdentityProvider
+    Properties:
+      AllowedOAuthFlowsUserPoolClient: true
+      ExplicitAuthFlows:
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      AllowedOAuthFlows:
+        - code
+        - implicit
+      AllowedOAuthScopes:
+        - phone
+        - email
+        - openid
+      SupportedIdentityProviders:
+        - COGNITO
+        - Google
+      UserPoolId: !Ref AuthAppUserPool
+      CallbackURLs:
+        - !Ref ExampleCallbackURL
+  
+  AuthAppUserPoolIdentityProvider:
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Properties:
+      UserPoolId: !Ref AuthAppUserPool
+      ProviderName: "Google"
+      ProviderDetails:
+        client_id: "client_id"
+        client_secret: "client_secret"
+        authorize_scopes: "profile email openid"
+      ProviderType: "Google"
+      AttributeMapping:
+        email: "email"
+
+  AuthAppUserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Sub user-pool-domain-${AWS::AccountId}-${AWS::Region}
+      UserPoolId: !Ref AuthAppUserPool
