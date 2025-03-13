@@ -5,31 +5,55 @@ Description: >
 
   Lambda Template for sam-auth-app
 
+Globals:
+  Function:
+    Timeout: 10
+    MemorySize: 512
+    CodeUri: functions/
+    Runtime: python3.12
+    Environment:
+      Variables:
+        LOG_LEVEL: "info"
+        STAGE: "prod"
+
+
 Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CognitoSignUpPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cognito-idp:SignUp
+                Resource: "*"
+  
+  AuthAppRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: test
+  
   SignUpLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: SignUpLambdaFunction
       Handler: sign_up.lambda_handler
-      CodeUri: functions/
-      Runtime: python3.12
-      Policies:
-        - AWSLambdaBasicExecutionRole
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - cognito-idp:SignUp
-              Resource: "*"
-
-Outputs:
-  SignUpLambdaIntegrationUri:
-    Description: "API Gateway Lambda Integration URI"
-    Value: 
-      Fn::Sub: 
-        - "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaFunctionArn}/invocations"
-        - LambdaFunctionArn: !GetAtt SignUpLambdaFunction.Arn
-  
-  SignUpLambdaIntegrationArn:
-    Description: "API Gateway Lambda Integration Arn"
-    Value: !GetAtt SignUpLambdaFunction.Arn
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /sign_up
+            Method: get
+            RestApiId: !Ref AuthAppRestApi
+      

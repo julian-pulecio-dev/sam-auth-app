@@ -20,11 +20,3 @@ Resources:
     Type: AWS::Serverless::Application
     Properties:
       Location: src\Lambdas\template.yaml
-
-  Api:
-    Type: AWS::Serverless::Application
-    Properties:
-      Location: src\Api\template.yaml
-      Parameters:
-        SignUpLambdaIntegrationUri: !GetAtt Lambdas.Outputs.SignUpLambdaIntegrationUri
-        SignUpLambdaIntegrationArn: !GetAtt Lambdas.Outputs.SignUpLambdaIntegrationArn
