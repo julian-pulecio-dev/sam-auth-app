@@ -10,7 +10,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: SignUpLambdaFunction
-      Handler: 'functions/sign_up.lambda_handler'
+      Handler: sign_up.lambda_handler
       CodeUri: functions/
       Runtime: python3.12
       Policies:

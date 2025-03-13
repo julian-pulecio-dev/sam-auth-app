@@ -29,7 +29,7 @@ Resources:
     Properties:
       RestApiId: !Ref AuthAppRestApi
       ResourceId: !Ref AuthAppSignUpResource
-      HttpMethod: ANY
+      HttpMethod: POST
       AuthorizationType: NONE
       Integration:
         Type: AWS_PROXY
