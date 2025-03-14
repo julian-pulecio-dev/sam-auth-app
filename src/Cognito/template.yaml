@@ -57,8 +57,8 @@ Resources:
       UserPoolId: !Ref AuthAppUserPool
       ProviderName: "Google"
       ProviderDetails:
-        client_id: "client_id"
-        client_secret: "client_secret"
+        client_id: '{{resolve:secretsmanager:google_api_credentials:SecretString:client_id}}'
+        client_secret: '{{resolve:secretsmanager:google_api_credentials:SecretString:client_secret}}'
         authorize_scopes: "profile email openid"
       ProviderType: "Google"
       AttributeMapping:
