@@ -5,11 +5,15 @@ Description: >
 
   Lambda Template for sam-auth-app
 
+Parameters:
+  AuthAppUserPoolClientID:
+    Type: String
+
 Globals:
   Function:
     Timeout: 10
     MemorySize: 512
-    CodeUri: functions/
+    CodeUri: ./
     Runtime: python3.12
     Environment:
       Variables:
@@ -37,23 +41,36 @@ Resources:
                 Action:
                   - cognito-idp:SignUp
                 Resource: "*"
+        - PolicyName: CloudWatchLogsPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
   
   AuthAppRestApi:
     Type: AWS::Serverless::Api
     Properties:
       StageName: test
   
-  SignUpLambdaFunction:
+  SignUpFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: SignUpLambdaFunction
-      Handler: sign_up.lambda_handler
+      FunctionName: SignUpFunction
+      Handler: functions/sign_up.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables: 
+          USER_POOL_CLIENT: !Ref AuthAppUserPoolClientID
       Events:
         ApiEvent:
           Type: Api
           Properties:
             Path: /sign_up
-            Method: get
+            Method: POST
             RestApiId: !Ref AuthAppRestApi
       

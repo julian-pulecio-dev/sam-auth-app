@@ -69,3 +69,8 @@ Resources:
     Properties:
       Domain: !Sub user-pool-domain-${AWS::AccountId}-${AWS::Region}
       UserPoolId: !Ref AuthAppUserPool
+
+Outputs:
+  AuthAppUserPoolClientID:
+    Description: 'AuthAppUserPoolClient ID'
+    Value: !Ref AuthAppUserPoolClient
