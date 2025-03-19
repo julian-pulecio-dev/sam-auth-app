@@ -3,13 +3,13 @@ from models.event_headers import EventHeaders
 from models.event_body import EventBody
 
 @dataclass
-class EventRequest:
+class EventValidator:
     event: InitVar[dict]
     
     def __post_init__(self, event:dict):
         self.event_headers, self.event_body = self.validate(event)
 
-    def _get_headers(self, event:dict) -> EventHeaders:
+    def _validate_headers(self, event:dict) -> EventHeaders:
         """Validate headers."""
         try:
             print('ev:', event)
@@ -20,7 +20,7 @@ class EventRequest:
         except TypeError as e:
             raise ValueError(f"Header validation error: {e}")
 
-    def _get_body(self, event:dict) -> EventBody:
+    def _validate_body(self, event:dict) -> EventBody:
         """Validate body."""
         try:
             body = EventBody(
@@ -33,8 +33,8 @@ class EventRequest:
 
     def validate(self, event:dict) -> tuple[EventHeaders, EventBody]:
         """Validate both headers and body."""
-        event_headers = self._get_headers(event)
-        event_body = self._get_body(event)
+        event_headers = self._validate_headers(event)
+        event_body = self._validate_body(event)
         return event_headers, event_body
 
     
