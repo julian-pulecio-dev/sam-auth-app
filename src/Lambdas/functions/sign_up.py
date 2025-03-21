@@ -7,7 +7,7 @@ client = boto3.client('cognito-idp')
 USER_POOL_CLIENT = os.environ.get('USER_POOL_CLIENT')
 
 @event_validator(SignUpRequest)
-def lambda_handler(event, context):
+def lambda_handler(event:SignUpRequest, context):
     print(event)
     return {
       "statusCode": 200,
