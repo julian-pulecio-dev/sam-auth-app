@@ -1,7 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from event_requests.event_request import EventRequest
 
 @dataclass
 class SignUpRequest(EventRequest):
-  email:str
   password:str
+  email:str
