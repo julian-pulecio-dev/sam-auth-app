@@ -17,7 +17,7 @@ class SignUpRequest(EventRequest):
 
   def _validate_email(self, email:str):
     if not re.match('^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email):
-      raise RequestException(f'{email} do not match the email format example@email.com')
+      raise RequestException(f'{email} emails do not match the email format example@email.com')
 
   def _validate_password(self, password:str):
     errors = []

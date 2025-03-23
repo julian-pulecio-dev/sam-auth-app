@@ -16,9 +16,9 @@ Globals:
     CodeUri: ./
     Runtime: python3.12
     Environment:
-      Variables:
-        LOG_LEVEL: "info"
-        STAGE: "prod"
+      Variables: 
+        USER_POOL_CLIENT: !Ref AuthAppUserPoolClientID
+      
 
 
 Resources:
@@ -63,14 +63,25 @@ Resources:
       FunctionName: SignUpFunction
       Handler: functions/sign_up.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
-      Environment:
-        Variables: 
-          USER_POOL_CLIENT: !Ref AuthAppUserPoolClientID
       Events:
         ApiEvent:
           Type: Api
           Properties:
             Path: /sign_up
+            Method: POST
+            RestApiId: !Ref AuthAppRestApi
+
+  ConfirmSignUpFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ConfirmSignUpFunction
+      Handler: functions/confirm_sign_up.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /confirm_sign_up
             Method: POST
             RestApiId: !Ref AuthAppRestApi
       

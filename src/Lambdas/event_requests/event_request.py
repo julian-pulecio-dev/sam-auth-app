@@ -1,6 +1,7 @@
 from dataclasses import dataclass, fields
 from exceptions.request_exception import RequestException
 from abc import ABC, abstractmethod
+import re
 
 
 @dataclass
@@ -30,4 +31,3 @@ class EventRequest(ABC):
         missing_fields = required_fields.difference(kwargs)
         if missing_fields:
             raise RequestException(f'Missing fields were found on the request: {list(missing_fields)}')
-    

@@ -13,18 +13,24 @@ class EventValidator:
         self.event_headers, self.event_body = self.validate(event)
 
     def _validate_headers(self, event:dict) -> EventHeaders:
-        headers = EventHeaders(
-            headers=event.get("headers"),
-        )
-        return headers
+        try:
+            headers = EventHeaders(
+                headers=event.get("headers"),
+            )
+            return headers
+        except TypeError as e:
+            raise RequestException(str(e))
         
     def _validate_body(self, event:dict, headers:EventHeaders) -> EventBody:
-        body = EventBody(
-            headers=headers,
-            body=event.get("body"),
-            is_base64_encoded=event.get("isBase64Encoded")
-        )
-        return body
+        try:
+            body = EventBody(
+                headers=headers,
+                body=event.get("body"),
+                is_base64_encoded=event.get("isBase64Encoded")
+            )
+            return body
+        except TypeError as e:
+            raise RequestException(str(e))
     
     def validate_request(self, request:EventRequest):
         try:
