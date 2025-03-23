@@ -9,6 +9,7 @@ logger = logging.getLogger()
 def event_validator(request_class:type):
     def decorator(function):
         def wrapper(event, context):
+            print('ev:', event)
             try:
                 event_validator = EventValidator(event)
                 event_request = event_validator.validate_request(request=request_class)
@@ -20,12 +21,6 @@ def event_validator(request_class:type):
                     "statusCode": e.status_code,
                     "body": json.dumps({"error": str(e)})
                 }
-            except Exception as e:
-                logger.error(f"Unexpected error: {e}")
-                return {
-                    "statusCode": 500,
-                    "body": json.dumps({"error": "Internal Server Error"})
-                }
-                
+            
         return wrapper
     return decorator

@@ -10,10 +10,7 @@ class EventValidator:
     event: InitVar[dict]
     
     def __post_init__(self, event:dict):
-        try:
-            self.event_headers, self.event_body = self.validate(event)
-        except TypeError as e:
-            raise RequestException(str(e), status_code=400)
+        self.event_headers, self.event_body = self.validate(event)
 
     def _validate_headers(self, event:dict) -> EventHeaders:
         headers = EventHeaders(
@@ -21,8 +18,9 @@ class EventValidator:
         )
         return headers
         
-    def _validate_body(self, event:dict) -> EventBody:
+    def _validate_body(self, event:dict, headers:EventHeaders) -> EventBody:
         body = EventBody(
+            headers=headers,
             body=event.get("body"),
             is_base64_encoded=event.get("isBase64Encoded")
         )
@@ -33,15 +31,13 @@ class EventValidator:
             request = request(**self.event_body.data)
             return request
         except TypeError as e:
-            print('my exception: ', e.args, e.__context__, )
             raise RequestException(
-                message=str(e),
-                status_code=400
+                message=str(e)
             )
         
     def validate(self, event:dict) -> tuple[EventHeaders, EventBody]:
         event_headers = self._validate_headers(event)
-        event_body = self._validate_body(event)
+        event_body = self._validate_body(event, event_headers)
         return event_headers, event_body
 
     

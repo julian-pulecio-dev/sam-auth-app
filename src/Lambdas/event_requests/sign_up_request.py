@@ -20,17 +20,21 @@ class SignUpRequest(EventRequest):
       raise RequestException(f'{email} do not match the email format example@email.com')
 
   def _validate_password(self, password:str):
+    errors = []
     if len(password) < 12:
-      raise RequestException(f'Password must be at least 12 characters long')
+      errors.append(f'Password must be at least 12 characters long')
  
     if not re.search(r'[a-z]', password):
-      raise RequestException('Password must contain at least one lowercase letter.')
+      errors.append('Password must contain at least one lowercase letter.')
  
     if not re.search(r'[A-Z]', password):
-      raise RequestException('Password must contain at least one uppercase letter.')
+      errors.append('Password must contain at least one uppercase letter.')
  
     if not re.search(r'\d', password):
-      raise RequestException('Password must contain at least one number.')
+      errors.append('Password must contain at least one number.')
      
     if not re.search(r'[\W_]', password):
-      raise RequestException('Password must contain at least one symbol.')
+      errors.append('Password must contain at least one symbol.')
+    
+    if errors:
+      raise RequestException(errors)

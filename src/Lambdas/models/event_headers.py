@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field, InitVar
-from typing import Optional
+from exceptions.request_exception import RequestException
 
 @dataclass
 class EventHeaders:
@@ -7,6 +7,6 @@ class EventHeaders:
 
   def __post_init__(self, headers:dict):
     if 'Content-Type' not in headers:
-      raise ValueError(f"Header validation error:")
+      raise RequestException(f"Header validation error Content-Type not found")
     self.content_type = headers.get('Content-Type')
     
