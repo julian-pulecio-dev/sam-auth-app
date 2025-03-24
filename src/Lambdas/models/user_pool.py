@@ -14,26 +14,20 @@ class UserPool:
     self.client = boto3.client(client)
 
   def sign_up(self, email:str, password:str):
-    try:
-      response = self.client.sign_up(
-        ClientId=USER_POOL_CLIENT,
-        Username=email,
-        Password=password, 
-      )
-      return response
-    except self.client.exceptions.UsernameExistsException as e:
-      raise RequestException('Username with thr requested email already exists.')
+    response = self.client.sign_up(
+      ClientId=USER_POOL_CLIENT,
+      Username=email,
+      Password=password, 
+    )
+    return response
   
   def confirm_sign_up(self, email:str, confirmation_code:str):
-    try:
-      response = self.client.confirm_sign_up(
-        ClientId=USER_POOL_CLIENT,
-        Username=email,
-        ConfirmationCode=confirmation_code
-      )
-      return response
-    except Exception as e:
-      raise e
-  
+    response = self.client.confirm_sign_up(
+      ClientId=USER_POOL_CLIENT,
+      Username=email,
+      ConfirmationCode=confirmation_code
+    )
+    return response
+      
   
         

@@ -1,8 +1,6 @@
 from dataclasses import dataclass, fields
 from exceptions.request_exception import RequestException
 from abc import ABC, abstractmethod
-import re
-
 
 @dataclass
 class EventRequest(ABC):

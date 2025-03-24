@@ -3,6 +3,7 @@ from models.event_headers import EventHeaders
 from models.event_body import EventBody
 from exceptions.request_exception import RequestException
 from event_requests.event_request import EventRequest
+from json import JSONDecodeError
 
 
 @dataclass
@@ -13,38 +14,31 @@ class EventValidator:
         self.event_headers, self.event_body = self.validate(event)
 
     def _validate_headers(self, event:dict) -> EventHeaders:
-        try:
-            headers = EventHeaders(
-                headers=event.get("headers"),
-            )
-            return headers
-        except TypeError as e:
-            raise RequestException(str(e))
+        headers = EventHeaders(
+            headers=event.get("headers"),
+        )
+        return headers
         
     def _validate_body(self, event:dict, headers:EventHeaders) -> EventBody:
-        try:
-            body = EventBody(
-                headers=headers,
-                body=event.get("body"),
-                is_base64_encoded=event.get("isBase64Encoded")
-            )
-            return body
-        except TypeError as e:
-            raise RequestException(str(e))
+        body = EventBody(
+            headers=headers,
+            body=event.get("body"),
+            is_base64_encoded=event.get("isBase64Encoded")
+        )
+        return body
     
     def validate_request(self, request:EventRequest):
-        try:
-            request = request(**self.event_body.data)
-            return request
-        except TypeError as e:
-            raise RequestException(
-                message=str(e)
-            )
+        request = request(**self.event_body.data)
+        return request
         
     def validate(self, event:dict) -> tuple[EventHeaders, EventBody]:
-        event_headers = self._validate_headers(event)
-        event_body = self._validate_body(event, event_headers)
-        return event_headers, event_body
+        try:
+            event_headers = self._validate_headers(event)
+            event_body = self._validate_body(event, event_headers)
+            return event_headers, event_body
+        except JSONDecodeError as e:
+            raise RequestException(e)
+
 
     
 

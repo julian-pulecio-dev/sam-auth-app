@@ -5,7 +5,7 @@ from exceptions.unsupported_media_type import UnsupportedMediaTypeException
 import base64
 import json
 
-# Define the expected structure of the body
+
 @dataclass
 class EventBody:
     headers: InitVar[EventHeaders]
@@ -24,7 +24,7 @@ class EventBody:
         if content_type == 'application/json':
             parsed_body = json.loads(body)
         elif content_type == 'application/x-www-form-urlencoded':
-            parsed_body = parse_qs(body)
+            parsed_body = { key: value[0] if value else None for key,value in parse_qs(body).items()}
         elif content_type == 'text/plain':
             parsed_body = body
         else:
