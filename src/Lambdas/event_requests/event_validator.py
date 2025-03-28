@@ -28,7 +28,10 @@ class EventValidator:
         return body
     
     def validate_request(self, request:EventRequest):
-        request = request(**self.event_body.data)
+        if self.event_body.data: 
+            request = request(**self.event_body.data)
+        else:
+            request = request(self.event_body.data)
         return request
         
     def validate(self, event:dict) -> tuple[EventHeaders, EventBody]:

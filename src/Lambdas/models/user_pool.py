@@ -20,6 +20,17 @@ class UserPool:
       Password=password, 
     )
     return response
+
+  def sign_in(self, email:str, password:str):
+    response = self.client.initiate_auth(
+      ClientId=USER_POOL_CLIENT,
+      AuthFlow='USER_PASSWORD_AUTH',
+      AuthParameters={
+        'USERNAME': email,
+        'PASSWORD': password
+      }
+    )
+    return response
   
   def confirm_sign_up(self, email:str, confirmation_code:str):
     response = self.client.confirm_sign_up(
@@ -28,6 +39,4 @@ class UserPool:
       ConfirmationCode=confirmation_code
     )
     return response
-      
-  
         

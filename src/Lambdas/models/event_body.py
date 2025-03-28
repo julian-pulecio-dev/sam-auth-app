@@ -22,7 +22,7 @@ class EventBody:
 
     def _parse_body(self, content_type:str, body:str):
         if content_type == 'application/json':
-            parsed_body = json.loads(body)
+            parsed_body = json.loads(body) if body else None
         elif content_type == 'application/x-www-form-urlencoded':
             parsed_body = { key: value[0] if value else None for key,value in parse_qs(body).items()}
         elif content_type == 'text/plain':

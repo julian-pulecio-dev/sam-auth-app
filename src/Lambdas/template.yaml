@@ -84,4 +84,17 @@ Resources:
             Path: /confirm_sign_up
             Method: POST
             RestApiId: !Ref AuthAppRestApi
-      
+
+  SignInFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: SignInFunction
+      Handler: functions/sign_in.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /sign_in
+            Method: POST
+            RestApiId: !Ref AuthAppRestApi
