@@ -8,6 +8,9 @@ Description: >
 Parameters:
   AuthAppUserPoolClientID:
     Type: String
+  FrontendOrigin:
+    Type: String
+    Default: "http://localhost:3000"
 
 Globals:
   Function:
@@ -18,8 +21,6 @@ Globals:
     Environment:
       Variables: 
         USER_POOL_CLIENT: !Ref AuthAppUserPoolClientID
-      
-
 
 Resources:
   LambdaExecutionRole:
@@ -56,6 +57,12 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: test
+      Cors:
+        AllowMethods: "'POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Accept,Accept-Encoding,Accept-Language,User-Agent,Access-Control-Allow-Origin'"
+        AllowOrigin: !Sub
+          - "'${Origin}'"
+          - Origin: !Ref FrontendOrigin
   
   SignUpFunction:
     Type: AWS::Serverless::Function

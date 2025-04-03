@@ -9,6 +9,8 @@ Parameters:
   ExampleCallbackURL:
     Type: String
     Default: "https://example.com/callback"
+  FrontendOrigin:
+    Type: String
 
 Resources:
   AuthAppUserPool:
@@ -27,7 +29,7 @@ Resources:
           RequireNumbers: true
           RequireSymbols: true
           RequireUppercase: true
-      
+
   AuthAppUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
     DependsOn: AuthAppUserPoolIdentityProvider
@@ -50,6 +52,9 @@ Resources:
       UserPoolId: !Ref AuthAppUserPool
       CallbackURLs:
         - !Ref ExampleCallbackURL
+        - !Ref FrontendOrigin
+      LogoutURLs:
+        - !Ref FrontendOrigin
   
   AuthAppUserPoolIdentityProvider:
     Type: AWS::Cognito::UserPoolIdentityProvider

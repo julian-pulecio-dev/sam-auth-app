@@ -9,10 +9,11 @@ import json
 @dataclass
 class EventBody:
     headers: InitVar[EventHeaders]
-    body: InitVar[str] = field(metadata={"alias": "Body"})
+    body: InitVar[str] = field(metadata={"alias": "body"})
     is_base64_encoded: InitVar[bool] = field(metadata={"alias": "isBase64Encoded"})
 
     def __post_init__(self, headers:EventHeaders, body:str, is_base64_encoded:bool):
+        print('headers.content_type:', headers.content_type)
         if is_base64_encoded:
             parsed_body = base64.b64decode(body).decode('utf-8')
         else: 

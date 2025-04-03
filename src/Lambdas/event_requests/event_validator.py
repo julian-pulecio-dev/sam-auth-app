@@ -3,6 +3,7 @@ from models.event_headers import EventHeaders
 from models.event_body import EventBody
 from exceptions.request_exception import RequestException
 from event_requests.event_request import EventRequest
+from utils.utils import get_case_insensitive_value
 from json import JSONDecodeError
 
 
@@ -15,16 +16,18 @@ class EventValidator:
 
     def _validate_headers(self, event:dict) -> EventHeaders:
         headers = EventHeaders(
-            headers=event.get("headers"),
+            headers=get_case_insensitive_value(event,"headers"),
         )
+        print('headers:', headers.content_type)
         return headers
         
     def _validate_body(self, event:dict, headers:EventHeaders) -> EventBody:
         body = EventBody(
             headers=headers,
-            body=event.get("body"),
-            is_base64_encoded=event.get("isBase64Encoded")
+            body=get_case_insensitive_value(event,"body"),
+            is_base64_encoded=get_case_insensitive_value(event,"isBase64Encoded")
         )
+        print('body:', body.data)
         return body
     
     def validate_request(self, request:EventRequest):
