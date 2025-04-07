@@ -8,7 +8,7 @@ Description: >
 Parameters:
   ExampleCallbackURL:
     Type: String
-    Default: "https://example.com/callback"
+    Default: "http://localhost:3000/social-login-confirm-code"
   FrontendOrigin:
     Type: String
 
@@ -39,6 +39,7 @@ Resources:
         - ALLOW_REFRESH_TOKEN_AUTH
         - ALLOW_USER_AUTH
         - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_USER_SRP_AUTH 
       AllowedOAuthFlows:
         - code
         - implicit

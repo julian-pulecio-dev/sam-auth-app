@@ -58,7 +58,7 @@ Resources:
     Properties:
       StageName: test
       Cors:
-        AllowMethods: "'POST,OPTIONS'"
+        AllowMethods: "'GET,POST,OPTIONS'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Accept,Accept-Encoding,Accept-Language,User-Agent,Access-Control-Allow-Origin'"
         AllowOrigin: !Sub
           - "'${Origin}'"
@@ -104,4 +104,18 @@ Resources:
           Properties:
             Path: /sign_in
             Method: POST
+            RestApiId: !Ref AuthAppRestApi
+
+  ConfirmSocialSignInCodeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ConfirmSocialSignInCodeFunction
+      Handler: functions/confirm_social_sign_in_code.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /confirm_social_sign_in_code
+            Method: GET
             RestApiId: !Ref AuthAppRestApi
