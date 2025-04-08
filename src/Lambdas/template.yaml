@@ -52,6 +52,18 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource: "*"
+        - PolicyName: SecretsManagerAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*"
+              - Effect: Allow
+                Action:
+                  - secretsmanager:ListSecrets
+                Resource: "*"
   
   AuthAppRestApi:
     Type: AWS::Serverless::Api
@@ -117,5 +129,5 @@ Resources:
           Type: Api
           Properties:
             Path: /confirm_social_sign_in_code
-            Method: GET
+            Method: POST
             RestApiId: !Ref AuthAppRestApi
