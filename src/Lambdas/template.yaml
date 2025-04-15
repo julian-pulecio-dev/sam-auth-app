@@ -10,7 +10,7 @@ Parameters:
     Type: String
   FrontendOrigin:
     Type: String
-    Default: "http://localhost:3000"
+    Default: "http://localhost:5173"
 
 Globals:
   Function:

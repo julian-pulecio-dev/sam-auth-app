@@ -8,7 +8,7 @@ Description: >
 Parameters:
   ExampleCallbackURL:
     Type: String
-    Default: "http://localhost:3000/social-login-confirm-code"
+    Default: "http://localhost:5173/social-login-confirm-code"
   FrontendOrigin:
     Type: String
 

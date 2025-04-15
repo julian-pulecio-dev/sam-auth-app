@@ -25,10 +25,6 @@ def lambda_handler(event: ConfirmSocialSignInCodeRequest, context):
         'grant_type': 'authorization_code'
     }
 
-    auth_str = f"{secret['client_id']}:{secret['client_secret']}"
-    basic_auth = base64.b64encode(auth_str.encode()).decode()
-    
-    # Encode payload as form data (recommended for OAuth)
     body = urlencode(payload).encode('utf-8')
 
     response = http.request(
@@ -40,16 +36,20 @@ def lambda_handler(event: ConfirmSocialSignInCodeRequest, context):
         }
     )
 
-    print(response.data.decode('utf-8'))  # Decode response for logging
+    response = json.loads(response.data.decode('utf-8'))
 
     return {
         "statusCode": 200,
         "headers": {
-            "Access-Control-Allow-Origin": os.environ.get("ALLOWED_ORIGIN", "http://localhost:3000"),
+            "Access-Control-Allow-Origin": os.environ.get("ALLOWED_ORIGIN", "http://localhost:5173"),
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Methods": "POST, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Accept,Accept-Encoding,Accept-Language,User-Agent,Access-Control-Allow-Origin",
             "Content-Type": "application/json"
         },
-        "body": json.dumps({"message": "Success"})
+        "body": json.dumps({
+            "accessToken": response.get("access_token"),
+            "idToken": response.get("id_token"),
+            "refreshToken": response.get("refresh_token")
+        })
     }
