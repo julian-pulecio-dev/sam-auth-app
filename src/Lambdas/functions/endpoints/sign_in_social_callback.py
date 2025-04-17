@@ -1,11 +1,11 @@
 from event_requests.confirm_social_sign_in_code_request import ConfirmSocialSignInCodeRequest
 from decorators.event_validator import event_validator
-import json
-import os
 from urllib3 import PoolManager
 from urllib.parse import urlencode
 from models.secret_manager import SecretManager
-import base64
+from headers import get_headers
+import json
+
 
 @event_validator(ConfirmSocialSignInCodeRequest)
 def lambda_handler(event: ConfirmSocialSignInCodeRequest, context):    
@@ -40,13 +40,7 @@ def lambda_handler(event: ConfirmSocialSignInCodeRequest, context):
 
     return {
         "statusCode": 200,
-        "headers": {
-            "Access-Control-Allow-Origin": os.environ.get("ALLOWED_ORIGIN", "http://localhost:5173"),
-            "Access-Control-Allow-Credentials": "true",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Accept,Accept-Encoding,Accept-Language,User-Agent,Access-Control-Allow-Origin",
-            "Content-Type": "application/json"
-        },
+        "headers": get_headers(),
         "body": json.dumps({
             "accessToken": response.get("access_token"),
             "idToken": response.get("id_token"),

@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-auth-app
+
+  Lambda Template for sam-auth-app
+
+Parameters:
+  AuthAppUserPoolClientID:
+    Type: String
+  FrontendOrigin:
+    Type: String
+
+Resources:
+  CaptchaDefineAuthChallenge:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: DefineAuthChallenge
+      Runtime: python3.12
+      Handler: functions/auth_challenges/captcha/define_auth_challenge.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+
+  CaptchaCreateAuthChallenge:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: CreateAuthChallenge
+      Runtime: python3.12
+      Handler: functions/auth_challenges/captcha/create_auth_challenge.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+
+  CaptchaVerifyAuthChallenge:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: VerifyAuthChallenge
+      Runtime: python3.12
+      Handler: functions/auth_challenges/captcha/verify_auth_challenge.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CognitoAuthChallengeLambdaRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaBasicExecution
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"

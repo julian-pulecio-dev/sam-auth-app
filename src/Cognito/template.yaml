@@ -17,8 +17,6 @@ Resources:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: AuthAppUserPool
-      AutoVerifiedAttributes:
-        - email
       UsernameAttributes:
         - email
       Policies:
@@ -37,8 +35,6 @@ Resources:
       AllowedOAuthFlowsUserPoolClient: true
       ExplicitAuthFlows:
         - ALLOW_REFRESH_TOKEN_AUTH
-        - ALLOW_USER_AUTH
-        - ALLOW_USER_PASSWORD_AUTH
         - ALLOW_USER_SRP_AUTH 
       AllowedOAuthFlows:
         - code

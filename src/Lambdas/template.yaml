@@ -10,124 +10,20 @@ Parameters:
     Type: String
   FrontendOrigin:
     Type: String
-    Default: "http://localhost:5173"
-
-Globals:
-  Function:
-    Timeout: 10
-    MemorySize: 512
-    CodeUri: ./
-    Runtime: python3.12
-    Environment:
-      Variables: 
-        USER_POOL_CLIENT: !Ref AuthAppUserPoolClientID
 
 Resources:
-  LambdaExecutionRole:
-    Type: AWS::IAM::Role
+  Endpoints:
+    Type: AWS::Serverless::Application
     Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: CognitoSignUpPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - cognito-idp:SignUp
-                Resource: "*"
-        - PolicyName: CloudWatchLogsPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: "*"
-        - PolicyName: SecretsManagerAccessPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - secretsmanager:GetSecretValue
-                Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*"
-              - Effect: Allow
-                Action:
-                  - secretsmanager:ListSecrets
-                Resource: "*"
-  
-  AuthAppRestApi:
-    Type: AWS::Serverless::Api
-    Properties:
-      StageName: test
-      Cors:
-        AllowMethods: "'GET,POST,OPTIONS'"
-        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Accept,Accept-Encoding,Accept-Language,User-Agent,Access-Control-Allow-Origin'"
-        AllowOrigin: !Sub
-          - "'${Origin}'"
-          - Origin: !Ref FrontendOrigin
-  
-  SignUpFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: SignUpFunction
-      Handler: functions/sign_up.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Events:
-        ApiEvent:
-          Type: Api
-          Properties:
-            Path: /sign_up
-            Method: POST
-            RestApiId: !Ref AuthAppRestApi
+      Location: template_endpoints.yaml
+      Parameters:
+        AuthAppUserPoolClientID: !Ref AuthAppUserPoolClientID
+        FrontendOrigin: !Ref FrontendOrigin
 
-  ConfirmSignUpFunction:
-    Type: AWS::Serverless::Function
+  AuthChallenges:
+    Type: AWS::Serverless::Application
     Properties:
-      FunctionName: ConfirmSignUpFunction
-      Handler: functions/confirm_sign_up.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Events:
-        ApiEvent:
-          Type: Api
-          Properties:
-            Path: /confirm_sign_up
-            Method: POST
-            RestApiId: !Ref AuthAppRestApi
-
-  SignInFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: SignInFunction
-      Handler: functions/sign_in.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Events:
-        ApiEvent:
-          Type: Api
-          Properties:
-            Path: /sign_in
-            Method: POST
-            RestApiId: !Ref AuthAppRestApi
-
-  ConfirmSocialSignInCodeFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: ConfirmSocialSignInCodeFunction
-      Handler: functions/confirm_social_sign_in_code.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
-      Events:
-        ApiEvent:
-          Type: Api
-          Properties:
-            Path: /confirm_social_sign_in_code
-            Method: POST
-            RestApiId: !Ref AuthAppRestApi
+      Location: template_auth_challenges.yaml
+      Parameters:
+        AuthAppUserPoolClientID: !Ref AuthAppUserPoolClientID
+        FrontendOrigin: !Ref FrontendOrigin

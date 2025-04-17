@@ -1,0 +1,107 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-auth-app
+
+  Lambda Template for sam-auth-app
+
+Parameters:
+  AuthAppUserPoolClientID:
+    Type: String
+  FrontendOrigin:
+    Type: String
+
+Globals:
+  Function:
+    Timeout: 10
+    MemorySize: 512
+    CodeUri: ./
+    Runtime: python3.12
+    Environment:
+      Variables: 
+        USER_POOL_CLIENT: !Ref AuthAppUserPoolClientID
+        ALLOWED_ORIGIN: !Sub
+          - "'${Origin}'"
+          - Origin: !Ref FrontendOrigin
+
+Resources:
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CognitoSignUpPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - cognito-idp:SignUp
+                Resource: "*"
+        - PolicyName: CloudWatchLogsPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "*"
+        - PolicyName: SecretsManagerAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*"
+              - Effect: Allow
+                Action:
+                  - secretsmanager:ListSecrets
+                Resource: "*"
+  
+  AuthAppRestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: test
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Accept,Accept-Encoding,Accept-Language,User-Agent,Access-Control-Allow-Origin'"
+        AllowOrigin: !Sub
+          - "'${Origin}'"
+          - Origin: !Ref FrontendOrigin
+  
+  SignUp:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: SignUp
+      Handler: functions/endpoints/sign_up.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /sign_up
+            Method: POST
+            RestApiId: !Ref AuthAppRestApi
+
+  SignInSocialCallback:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: SignInSocialCallback
+      Handler: functions/endpoints/sign_in_social_callback.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /sign_in_social_callback
+            Method: POST
+            RestApiId: !Ref AuthAppRestApi
