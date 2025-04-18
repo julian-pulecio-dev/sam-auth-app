@@ -2,7 +2,6 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
   sam-auth-app
-
   Cognito Template for sam-auth-app
 
 Parameters:
@@ -10,6 +9,12 @@ Parameters:
     Type: String
     Default: "http://localhost:5173/social-login-confirm-code"
   FrontendOrigin:
+    Type: String
+  CaptchaDefineAuthChallengeARN:
+    Type: String
+  CaptchaCreateAuthChallengeARN:
+    Type: String
+  CaptchaVerifyAuthChallengeARN:
     Type: String
 
 Resources:
@@ -27,6 +32,12 @@ Resources:
           RequireNumbers: true
           RequireSymbols: true
           RequireUppercase: true
+      LambdaConfig:
+        DefineAuthChallenge: !Ref CaptchaDefineAuthChallengeARN
+        CreateAuthChallenge: !Ref CaptchaCreateAuthChallengeARN
+        VerifyAuthChallengeResponse: !Ref CaptchaVerifyAuthChallengeARN
+      AutoVerifiedAttributes:
+        - email
 
   AuthAppUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
@@ -34,8 +45,10 @@ Resources:
     Properties:
       AllowedOAuthFlowsUserPoolClient: true
       ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
         - ALLOW_REFRESH_TOKEN_AUTH
-        - ALLOW_USER_SRP_AUTH 
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_CUSTOM_AUTH
       AllowedOAuthFlows:
         - code
         - implicit
@@ -52,6 +65,31 @@ Resources:
         - !Ref FrontendOrigin
       LogoutURLs:
         - !Ref FrontendOrigin
+
+  # Add Lambda invocation permissions for each trigger
+  DefineAuthChallengePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref CaptchaDefineAuthChallengeARN
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt AuthAppUserPool.Arn
+
+  CreateAuthChallengePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref CaptchaCreateAuthChallengeARN
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt AuthAppUserPool.Arn
+
+  VerifyAuthChallengePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref CaptchaVerifyAuthChallengeARN
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt AuthAppUserPool.Arn
   
   AuthAppUserPoolIdentityProvider:
     Type: AWS::Cognito::UserPoolIdentityProvider
@@ -76,3 +114,6 @@ Outputs:
   AuthAppUserPoolClientID:
     Description: 'AuthAppUserPoolClient ID'
     Value: !Ref AuthAppUserPoolClient
+  AuthAppUserPoolARN:
+    Description: 'AuthAppUserPool ARN'
+    Value: !GetAtt AuthAppUserPool.Arn

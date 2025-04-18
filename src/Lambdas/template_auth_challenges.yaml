@@ -5,12 +5,6 @@ Description: >
 
   Lambda Template for sam-auth-app
 
-Parameters:
-  AuthAppUserPoolClientID:
-    Type: String
-  FrontendOrigin:
-    Type: String
-
 Resources:
   CaptchaDefineAuthChallenge:
     Type: AWS::Lambda::Function
@@ -56,7 +50,22 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
+                  - logs:*
                 Resource: "*"
+              - Effect: Allow
+                Action:
+                  - cognito-idp:*
+                Resource: "*"
+
+Outputs:
+  CaptchaDefineAuthChallengeARN:
+    Description: ARN of the CaptchaDefineAuthChallenge Lambda function
+    Value: !GetAtt CaptchaDefineAuthChallenge.Arn
+
+  CaptchaCreateAuthChallengeARN:
+    Description: ARN of the CaptchaCreateAuthChallenge Lambda function
+    Value: !GetAtt CaptchaCreateAuthChallenge.Arn
+  
+  CaptchaVerifyAuthChallengeARN:
+    Description: ARN of the CaptchaVerifyAuthChallenge Lambda function
+    Value: !GetAtt CaptchaVerifyAuthChallenge.Arn

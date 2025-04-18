@@ -6,6 +6,8 @@ Description: >
   Lambda Template for sam-auth-app
 
 Parameters:
+  AuthAppUserPoolARN:
+    Type: String
   AuthAppUserPoolClientID:
     Type: String
   FrontendOrigin:
@@ -71,6 +73,14 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       StageName: test
+      Auth:
+        DefaultAuthorizer: MyCognitoAuthorizer
+        Authorizers:
+          MyCognitoAuthorizer:
+            UserPoolArn: !Ref AuthAppUserPoolARN
+            Identity:
+              Header: Authorization
+              ReauthorizeEvery: 3000
       Cors:
         AllowMethods: "'GET,POST,OPTIONS'"
         AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,Accept,Accept-Encoding,Accept-Language,User-Agent,Access-Control-Allow-Origin'"
@@ -91,6 +101,8 @@ Resources:
             Path: /sign_up
             Method: POST
             RestApiId: !Ref AuthAppRestApi
+            Auth:
+              Authorizer: NONE
 
   SignInSocialCallback:
     Type: AWS::Serverless::Function
@@ -103,5 +115,37 @@ Resources:
           Type: Api
           Properties:
             Path: /sign_in_social_callback
+            Method: POST
+            RestApiId: !Ref AuthAppRestApi
+            Auth:
+              Authorizer: NONE
+
+  ConfirmSignUp:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: ConfirmSignUp
+      Handler: functions/endpoints/confirm_sign_up.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /confirm_sign_up
+            Method: POST
+            RestApiId: !Ref AuthAppRestApi
+            Auth:
+              Authorizer: NONE
+
+  Protected:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: Protected
+      Handler: functions/endpoints/protected.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /protected
             Method: POST
             RestApiId: !Ref AuthAppRestApi

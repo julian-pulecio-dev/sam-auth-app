@@ -16,17 +16,26 @@ Parameters:
     Default: "http://localhost:5173"
 
 Resources:
+  AuthChallengesLambdas:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: src\Lambdas\template_auth_challenges.yaml
+        
   Cognito:
     Type: AWS::Serverless::Application
     Properties:
       Location: src\Cognito\template.yaml
       Parameters:
         FrontendOrigin: !Ref FrontendOrigin
-
-  Lambdas:
+        CaptchaDefineAuthChallengeARN: !GetAtt AuthChallengesLambdas.Outputs.CaptchaDefineAuthChallengeARN
+        CaptchaCreateAuthChallengeARN: !GetAtt AuthChallengesLambdas.Outputs.CaptchaCreateAuthChallengeARN
+        CaptchaVerifyAuthChallengeARN: !GetAtt AuthChallengesLambdas.Outputs.CaptchaVerifyAuthChallengeARN
+        
+  EndpointLambdas:
     Type: AWS::Serverless::Application
     Properties:
-      Location: src\Lambdas\template.yaml
+      Location: src\Lambdas\template_endpoints.yaml
       Parameters:
+        AuthAppUserPoolARN: !GetAtt Cognito.Outputs.AuthAppUserPoolARN
         AuthAppUserPoolClientID: !GetAtt Cognito.Outputs.AuthAppUserPoolClientID
         FrontendOrigin: !Ref FrontendOrigin
