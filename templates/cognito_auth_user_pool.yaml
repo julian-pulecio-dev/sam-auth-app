@@ -18,10 +18,10 @@ Parameters:
     Type: String
 
 Resources:
-  AuthAppUserPool:
+  AuthUserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: AuthAppUserPool
+      UserPoolName: AuthUserPool
       Schema:
         - Name: captcha_completed
           AttributeDataType: Boolean
@@ -44,9 +44,9 @@ Resources:
       AutoVerifiedAttributes:
         - email
 
-  AuthAppUserPoolClient:
+  AuthUserPoolClient:
     Type: AWS::Cognito::UserPoolClient
-    DependsOn: AuthAppUserPoolIdentityProvider
+    DependsOn: AuthUserPoolIdentityProvider
     Properties:
       AllowedOAuthFlowsUserPoolClient: true
       ExplicitAuthFlows:
@@ -64,17 +64,17 @@ Resources:
       SupportedIdentityProviders:
         - COGNITO
         - Google
-      UserPoolId: !Ref AuthAppUserPool
+      UserPoolId: !Ref AuthUserPool
       CallbackURLs:
         - !Ref ExampleCallbackURL
         - !Ref FrontendOrigin
       LogoutURLs:
         - !Ref FrontendOrigin
 
-  AuthAppUserPoolIdentityProvider:
+  AuthUserPoolIdentityProvider:
     Type: AWS::Cognito::UserPoolIdentityProvider
     Properties:
-      UserPoolId: !Ref AuthAppUserPool
+      UserPoolId: !Ref AuthUserPool
       ProviderName: "Google"
       ProviderDetails:
         client_id: '{{resolve:secretsmanager:google_api_credentials:SecretString:client_id}}'
@@ -84,11 +84,11 @@ Resources:
       AttributeMapping:
         email: "email"
 
-  AuthAppUserPoolDomain:
+  AuthUserPoolDomain:
     Type: AWS::Cognito::UserPoolDomain
     Properties:
       Domain: !Sub user-pool-domain-${AWS::AccountId}-${AWS::Region}
-      UserPoolId: !Ref AuthAppUserPool
+      UserPoolId: !Ref AuthUserPool
 
   AuthIdentityPool:
     Type: AWS::Cognito::IdentityPool
@@ -96,13 +96,16 @@ Resources:
       IdentityPoolName: !Sub 'AuthAppIdentityPool'
       AllowUnauthenticatedIdentities: false
       CognitoIdentityProviders:
-        - ClientId: !Ref AuthAppUserPoolClient
-          ProviderName: !GetAtt AuthAppUserPool.ProviderName
+        - ClientId: !Ref AuthUserPoolClient
+          ProviderName: !GetAtt AuthUserPool.ProviderName
 
 Outputs:
-  AuthAppUserPoolClientID:
-    Description: 'AuthAppUserPoolClient ID'
-    Value: !Ref AuthAppUserPoolClient
-  AuthAppUserPoolARN:
-    Description: 'AuthAppUserPool ARN'
-    Value: !GetAtt AuthAppUserPool.Arn
+  AuthUserPoolID:
+    Description: 'AuthUserPool ID'
+    Value: !Ref AuthUserPool
+  AuthUserPoolClientID:
+    Description: 'AuthUserPoolClient ID'
+    Value: !Ref AuthUserPoolClient
+  AuthUserPoolARN:
+    Description: 'AuthUserPool ARN'
+    Value: !GetAtt AuthUserPool.Arn

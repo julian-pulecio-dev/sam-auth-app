@@ -5,36 +5,46 @@ Description: >
 
   Sample SAM Template for sam-auth-app
 
-Globals:
-  Function:
-    Timeout: 3
-
 Parameters:
   FrontendOrigin:
     Type: String
     Default: "http://localhost:5173"
 
 Resources:
-  AuthChallengesLambdas:
+  LambdasAuthChallenges:
     Type: AWS::Serverless::Application
     Properties:
-      Location: templates\auth_challenges.yaml
+      Location: templates\lambdas_auth_challenges.yaml
         
-  Cognito:
+  CognitoAuthUserPool:
     Type: AWS::Serverless::Application
     Properties:
-      Location: templates\cognito.yaml
+      Location: templates\cognito_auth_user_pool.yaml
       Parameters:
         FrontendOrigin: !Ref FrontendOrigin
-        CaptchaDefineAuthChallengeARN: !GetAtt AuthChallengesLambdas.Outputs.CaptchaDefineAuthChallengeARN
-        CaptchaCreateAuthChallengeARN: !GetAtt AuthChallengesLambdas.Outputs.CaptchaCreateAuthChallengeARN
-        CaptchaVerifyAuthChallengeARN: !GetAtt AuthChallengesLambdas.Outputs.CaptchaVerifyAuthChallengeARN
+        CaptchaDefineAuthChallengeARN: !GetAtt LambdasAuthChallenges.Outputs.CaptchaDefineAuthChallengeARN
+        CaptchaCreateAuthChallengeARN: !GetAtt LambdasAuthChallenges.Outputs.CaptchaCreateAuthChallengeARN
+        CaptchaVerifyAuthChallengeARN: !GetAtt LambdasAuthChallenges.Outputs.CaptchaVerifyAuthChallengeARN
 
-  EndpointLambdas:
+  LambdaEndpointsExecutionRoleARN:
     Type: AWS::Serverless::Application
     Properties:
-      Location: templates\endpoints.yaml
+      Location: templates\permissions_endpoints.yaml
+
+  LambdasEndpoints:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: templates\lambdas_endpoints.yaml
       Parameters:
-        AuthAppUserPoolARN: !GetAtt Cognito.Outputs.AuthAppUserPoolARN
-        AuthAppUserPoolClientID: !GetAtt Cognito.Outputs.AuthAppUserPoolClientID
+        LambdaEndpointsExecutionRoleARN: !GetAtt LambdaEndpointsExecutionRoleARN.Outputs.LambdaEndpointsExecutionRoleARN
+        AuthUserPoolARN: !GetAtt CognitoAuthUserPool.Outputs.AuthUserPoolARN
+        AuthUserPoolClientID: !GetAtt CognitoAuthUserPool.Outputs.AuthUserPoolClientID
         FrontendOrigin: !Ref FrontendOrigin
+
+  CognitoUserRoles:
+    Type: AWS::Serverless::Application
+    Properties:
+      Location: templates\cognito_user_roles.yaml
+      Parameters:
+        AuthUserPoolID: !GetAtt CognitoAuthUserPool.Outputs.AuthUserPoolID
+        AuthAppRestApiID: !GetAtt LambdasEndpoints.Outputs.AuthAppRestApiID

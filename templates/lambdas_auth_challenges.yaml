@@ -33,7 +33,6 @@ Resources:
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: CognitoAuthChallengeLambdaRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:

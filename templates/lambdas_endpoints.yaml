@@ -6,9 +6,11 @@ Description: >
   Lambda Template for sam-auth-app
 
 Parameters:
-  AuthAppUserPoolARN:
+  LambdaEndpointsExecutionRoleARN:
     Type: String
-  AuthAppUserPoolClientID:
+  AuthUserPoolARN:
+    Type: String
+  AuthUserPoolClientID:
     Type: String
   FrontendOrigin:
     Type: String
@@ -21,54 +23,12 @@ Globals:
     Runtime: python3.12
     Environment:
       Variables: 
-        USER_POOL_CLIENT: !Ref AuthAppUserPoolClientID
+        USER_POOL_CLIENT: !Ref AuthUserPoolClientID
         ALLOWED_ORIGIN: !Sub
           - "'${Origin}'"
           - Origin: !Ref FrontendOrigin
 
-Resources:
-  LambdaExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: lambda.amazonaws.com
-            Action: sts:AssumeRole
-      Policies:
-        - PolicyName: CognitoSignUpPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - cognito-idp:SignUp
-                Resource: "*"
-        - PolicyName: CloudWatchLogsPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:CreateLogGroup
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                Resource: "*"
-        - PolicyName: SecretsManagerAccessPolicy
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - secretsmanager:GetSecretValue
-                Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:*"
-              - Effect: Allow
-                Action:
-                  - secretsmanager:ListSecrets
-                Resource: "*"
-  
+Resources:  
   AuthAppRestApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -77,7 +37,7 @@ Resources:
         DefaultAuthorizer: MyCognitoAuthorizer
         Authorizers:
           MyCognitoAuthorizer:
-            UserPoolArn: !Ref AuthAppUserPoolARN
+            UserPoolArn: !Ref AuthUserPoolARN
             Identity:
               Header: Authorization
               ReauthorizeEvery: 3000
@@ -93,7 +53,7 @@ Resources:
     Properties:
       FunctionName: SignUp
       Handler: functions.endpoints.sign_up.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role: !Ref LambdaEndpointsExecutionRoleARN
       Events:
         ApiEvent:
           Type: Api
@@ -109,7 +69,7 @@ Resources:
     Properties:
       FunctionName: SignInSocialCallback
       Handler: functions.endpoints.sign_in_social_callback.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role: !Ref LambdaEndpointsExecutionRoleARN
       Events:
         ApiEvent:
           Type: Api
@@ -125,7 +85,7 @@ Resources:
     Properties:
       FunctionName: SignInCustomAuth
       Handler: functions.endpoints.sign_in_custom_auth.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role: !Ref LambdaEndpointsExecutionRoleARN
       Events:
         ApiEvent:
           Type: Api
@@ -139,7 +99,7 @@ Resources:
     Properties:
       FunctionName: ConfirmSignUp
       Handler: functions.endpoints.confirm_sign_up.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role: !Ref LambdaEndpointsExecutionRoleARN
       Events:
         ApiEvent:
           Type: Api
@@ -155,7 +115,7 @@ Resources:
     Properties:
       FunctionName: Protected
       Handler: functions.endpoints.sign_up.lambda_handler
-      Role: !GetAtt LambdaExecutionRole.Arn
+      Role: !Ref LambdaEndpointsExecutionRoleARN
       Events:
         ApiEvent:
           Type: Api
@@ -163,3 +123,8 @@ Resources:
             Path: /protected
             Method: POST
             RestApiId: !Ref AuthAppRestApi
+
+Outputs:
+  AuthAppRestApiID:
+    Description: ID of the AuthApp Rest API
+    Value: !Ref AuthAppRestApi
