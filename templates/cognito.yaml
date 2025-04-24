@@ -22,6 +22,11 @@ Resources:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: AuthAppUserPool
+      Schema:
+        - Name: captcha_completed
+          AttributeDataType: Boolean
+          Mutable: true
+          Required: false
       UsernameAttributes:
         - email
       Policies:
@@ -66,31 +71,6 @@ Resources:
       LogoutURLs:
         - !Ref FrontendOrigin
 
-  # Add Lambda invocation permissions for each trigger
-  DefineAuthChallengePermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref CaptchaDefineAuthChallengeARN
-      Principal: cognito-idp.amazonaws.com
-      SourceArn: !GetAtt AuthAppUserPool.Arn
-
-  CreateAuthChallengePermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref CaptchaCreateAuthChallengeARN
-      Principal: cognito-idp.amazonaws.com
-      SourceArn: !GetAtt AuthAppUserPool.Arn
-
-  VerifyAuthChallengePermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref CaptchaVerifyAuthChallengeARN
-      Principal: cognito-idp.amazonaws.com
-      SourceArn: !GetAtt AuthAppUserPool.Arn
-  
   AuthAppUserPoolIdentityProvider:
     Type: AWS::Cognito::UserPoolIdentityProvider
     Properties:
@@ -109,6 +89,15 @@ Resources:
     Properties:
       Domain: !Sub user-pool-domain-${AWS::AccountId}-${AWS::Region}
       UserPoolId: !Ref AuthAppUserPool
+
+  AuthIdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      IdentityPoolName: !Sub 'AuthAppIdentityPool'
+      AllowUnauthenticatedIdentities: false
+      CognitoIdentityProviders:
+        - ClientId: !Ref AuthAppUserPoolClient
+          ProviderName: !GetAtt AuthAppUserPool.ProviderName
 
 Outputs:
   AuthAppUserPoolClientID:

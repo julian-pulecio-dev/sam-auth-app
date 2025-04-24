@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-auth-app
+  Cognito Template for sam-auth-app
+
+Parameters:
+  AuthAppUserPoolArn:
+    Type: String
+  CaptchaDefineAuthChallengeARN:
+    Type: String
+  CaptchaCreateAuthChallengeARN:
+    Type: String
+  CaptchaVerifyAuthChallengeARN:
+    Type: String
+
+Resources:
+  DefineAuthChallengePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref CaptchaDefineAuthChallengeARN
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt AuthAppUserPool.Arn
+
+  CreateAuthChallengePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref CaptchaCreateAuthChallengeARN
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt AuthAppUserPool.Arn
+
+  VerifyAuthChallengePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref CaptchaVerifyAuthChallengeARN
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt AuthAppUserPool.Arn

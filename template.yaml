@@ -5,7 +5,6 @@ Description: >
 
   Sample SAM Template for sam-auth-app
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 3
@@ -19,22 +18,22 @@ Resources:
   AuthChallengesLambdas:
     Type: AWS::Serverless::Application
     Properties:
-      Location: src\Lambdas\template_auth_challenges.yaml
+      Location: templates\auth_challenges.yaml
         
   Cognito:
     Type: AWS::Serverless::Application
     Properties:
-      Location: src\Cognito\template.yaml
+      Location: templates\cognito.yaml
       Parameters:
         FrontendOrigin: !Ref FrontendOrigin
         CaptchaDefineAuthChallengeARN: !GetAtt AuthChallengesLambdas.Outputs.CaptchaDefineAuthChallengeARN
         CaptchaCreateAuthChallengeARN: !GetAtt AuthChallengesLambdas.Outputs.CaptchaCreateAuthChallengeARN
         CaptchaVerifyAuthChallengeARN: !GetAtt AuthChallengesLambdas.Outputs.CaptchaVerifyAuthChallengeARN
-        
+
   EndpointLambdas:
     Type: AWS::Serverless::Application
     Properties:
-      Location: src\Lambdas\template_endpoints.yaml
+      Location: templates\endpoints.yaml
       Parameters:
         AuthAppUserPoolARN: !GetAtt Cognito.Outputs.AuthAppUserPoolARN
         AuthAppUserPoolClientID: !GetAtt Cognito.Outputs.AuthAppUserPoolClientID

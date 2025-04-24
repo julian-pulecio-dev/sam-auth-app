@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  sam-auth-app
+  Cognito Template for sam-auth-app
+
+Parameters:
+  AuthAppUserPoolId:
+    Type: String
+  ApiGatewayId:  # <-- New parameter for API Gateway ID
+    Type: String
+    Default: "your-api-id-here"  # Replace with your actual API ID or remove if referencing within the template
+
+Resources:
+  ModeratorGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: "Moderator"
+      Description: "Content moderators"
+      UserPoolId: !Ref AuthAppUserPoolId
+      Precedence: 20
+      RoleArn: !GetAtt ModeratorRole.Arn
+
+  UserGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: "User"
+      Description: "Regular users"
+      UserPoolId: !Ref AuthAppUserPoolId
+      Precedence: 30
+      RoleArn: !GetAtt UserRole.Arn
+
+  ModeratorRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "ModeratorRole"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: sts:AssumeRoleWithWebIdentity
+      Policies:
+        - PolicyName: "ModeratorAPIAccess"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: execute-api:Invoke
+                Resource:
+                  - !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayId}/*/GET/admin/*"  # Moderator-only routes
+                  - !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayId}/*/POST/admin/*"
+
+  UserRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "UserRole"
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: cognito-identity.amazonaws.com
+            Action: sts:AssumeRoleWithWebIdentity
+      Policies:
+        - PolicyName: "UserBasicAccess"
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: execute-api:Invoke
+                Resource:
+                  - !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayId}/*/GET/public/*"  # Public routes only
+              - Effect: Deny  # Explicitly block moderator routes
+                Action: execute-api:Invoke
+                Resource:
+                  - !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayId}/*/GET/admin/*"
+                  - !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayId}/*/POST/admin/*"

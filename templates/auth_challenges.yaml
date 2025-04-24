@@ -11,7 +11,7 @@ Resources:
     Properties:
       FunctionName: DefineAuthChallenge
       Runtime: python3.12
-      Handler: functions/auth_challenges/captcha/define_auth_challenge.lambda_handler
+      Handler: ../src/functions/auth_challenges/captcha/define_auth_challenge.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
 
   CaptchaCreateAuthChallenge:
@@ -19,7 +19,7 @@ Resources:
     Properties:
       FunctionName: CreateAuthChallenge
       Runtime: python3.12
-      Handler: functions/auth_challenges/captcha/create_auth_challenge.lambda_handler
+      Handler: ../src/functions/auth_challenges/captcha/create_auth_challenge.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
 
   CaptchaVerifyAuthChallenge:
@@ -27,7 +27,7 @@ Resources:
     Properties:
       FunctionName: VerifyAuthChallenge
       Runtime: python3.12
-      Handler: functions/auth_challenges/captcha/verify_auth_challenge.lambda_handler
+      Handler: ../src/functions/auth_challenges/captcha/verify_auth_challenge.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
 
   LambdaExecutionRole:

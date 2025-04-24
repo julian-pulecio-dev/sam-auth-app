@@ -21,14 +21,13 @@ class UserPool:
     )
     return response
 
-  def sign_in(self, email:str, password:str):
+  def sign_in_custom_auth(self, email:str):
     response = self.client.initiate_auth(
-      ClientId=USER_POOL_CLIENT,
-      AuthFlow='USER_PASSWORD_AUTH',
-      AuthParameters={
-        'USERNAME': email,
-        'PASSWORD': password
-      }
+        ClientId=USER_POOL_CLIENT,
+        AuthFlow='CUSTOM_AUTH',
+        AuthParameters={
+            'USERNAME': email
+        }
     )
     return response
   

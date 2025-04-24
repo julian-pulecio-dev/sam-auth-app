@@ -17,7 +17,7 @@ Globals:
   Function:
     Timeout: 10
     MemorySize: 512
-    CodeUri: ./
+    CodeUri: ../src/ 
     Runtime: python3.12
     Environment:
       Variables: 
@@ -92,7 +92,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: SignUp
-      Handler: functions/endpoints/sign_up.lambda_handler
+      Handler: functions.endpoints.sign_up.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         ApiEvent:
@@ -108,7 +108,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: SignInSocialCallback
-      Handler: functions/endpoints/sign_in_social_callback.lambda_handler
+      Handler: functions.endpoints.sign_in_social_callback.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         ApiEvent:
@@ -120,11 +120,25 @@ Resources:
             Auth:
               Authorizer: NONE
 
+  SignInCustomAuth:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: SignInCustomAuth
+      Handler: functions.endpoints.sign_in_custom_auth.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            Path: /sign_in_custom_auth
+            Method: POST
+            RestApiId: !Ref AuthAppRestApi
+
   ConfirmSignUp:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: ConfirmSignUp
-      Handler: functions/endpoints/confirm_sign_up.lambda_handler
+      Handler: functions.endpoints.confirm_sign_up.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         ApiEvent:
@@ -140,7 +154,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: Protected
-      Handler: functions/endpoints/protected.lambda_handler
+      Handler: functions.endpoints.sign_up.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Events:
         ApiEvent:
